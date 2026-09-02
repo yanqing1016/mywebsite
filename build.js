@@ -27,7 +27,11 @@ for (const f of FILES) {
 }
 for (const d of DIRS) {
   if (!fs.existsSync(path.join(ROOT, d, "index.html"))) {
-    console.error("BUILD ERROR: 缺少 " + d + "/index.html，请确认计算器目录已上传");
+    console.error(
+      "BUILD ERROR: 缺少 " + d + "/index.html —— 仓库里还没有 " + d +
+      "/ 目录。把本目录 github-upload/" + d +
+      " 里的 5 个文件上传到仓库同名目录（GitHub 网页：Add file → Upload files 可整文件夹拖入）"
+    );
     process.exit(1);
   }
 }

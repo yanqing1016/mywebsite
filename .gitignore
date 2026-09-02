@@ -3,3 +3,6 @@ node_modules/
 
 # 静态托管构建产物（ESA 每次 CI 构建时由 build.js 重新生成）
 dist/
+
+# 本地网页上传暂存包（其内容应上传到仓库根的 dsp/ 与 satisfactory/，而非上传包本身）
+github-upload/

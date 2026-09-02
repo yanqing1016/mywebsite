@@ -49,6 +49,18 @@ http://<主机IP>:2028/satisfactory/ → 幸福工厂 产线计算器
 
 ESA 控制台里对应设置（若面板可填）：安装命令留空、构建命令 `npm run build`、**输出目录 `dist`**。推送到 main 分支后触发重建，构建成功后通过 `https://<你的域名>/build_info.txt` 验证是否为新构建。
 
+### GitHub 仓库需要哪些文件
+
+仓库根目录 = 站点根，必须包含：
+
+- 根目录 4 个门户文件：`index.html`、`styles.css`、`particles.js`、`bg.jpg`（已推送 ✓）
+- 构建配套：`package.json`、`build.js`、`esa.jsonc`、`.gitignore`（已推送 ✓）
+- **两个计算器目录**：`dsp/` 与 `satisfactory/`，各只需 5 个文件 —— `index.html`、`styles.css`、`data.js`、`app.js`、`vendor/html2canvas.min.js`。图标已全部内嵌在 data.js（data URL），**运行不需要 img/ 目录**（它只在本地重新生成数据时用）。
+
+本目录的 `github-upload/` 就是按上述要求生成的网页上传包（10 个文件，约 4.7MB）：在 GitHub 仓库页 **Add file → Upload files**，把 `github-upload/` 里的 `dsp` 和 `satisfactory` 两个文件夹一起拖进去，Commit 即可（GitHub 会保留文件夹结构，10 个文件远低于单次 100 个的上传限制）。
+
+> 之所以只传 10 个文件而不是完整 app 目录（dsp 189 个文件 / satisfactory 365 个），是因为本机未装 git，网页拖传几百个文件不现实；而 5 个运行必需文件已足够线上完整运行（浏览器已实测：门户、双计算器初始化、图标渲染全部正常）。
+
 ## 部署（NAS / 任意 Docker 主机）
 
 把整个 `v4/` 目录传到 NAS，然后：
@@ -83,6 +95,7 @@ robocopy D:\test\幸福工厂计算器\app D:\test\网站\v4\satisfactory  /MIR
 - **v4**：粒子改为绿蓝交替，密度增加一倍（210 → 420 颗）。
 - **v4 修订**（原地更新，不另开版本）：两个入口按钮下移贴到视口下部（标题中偏上、按钮距底部约 11vh），中间完全让位给粒子光效；粒子更小更细腻、密度 420 → 600 颗、绿蓝色相进一步拉开（118–138 对 210–226）提高对比度；缓存参数 `styles.css?v=4.2`、`particles.js?v=4.3`。
 - **v4 修订 2**（原地更新）：修复阿里云 ESA 从 Git 构建失败的问题——新增 `package.json`、`build.js`、`esa.jsonc`、`.gitignore`，构建 = 复制站点到 `dist/`；Docker 部署不受影响。
+- **v4 修订 3**（原地更新）：ESA 二次构建失败定位为仓库缺少 `dsp/`、`satisfactory/` 目录；新增 `github-upload/`（每个计算器仅 5 个运行必需文件，共 10 个），网页拖传即可补齐；浏览器实测精简版双计算器运行正常。
 
 ## 许可
 
