@@ -4,16 +4,21 @@
 //   installCommand  — 留空跳过依赖安装（日志 "installCommand is empty, skipping installation"）
 //   buildCommand    — 构建命令（日志 "Using buildCommand in esa.jsonc"）
 //
-// assets 目录字段名暂无官方文档，这里同时写入多种常见命名（值均为 dist）：
-//   ESA 识别其中任意一个即完成静态资源目录配置；未识别的字段会被忽略，无副作用。
-//   若 ESA 控制台里有「assets 目录 / 静态资源目录」设置项，也可直接填 dist（以控制台为准）。
+// 静态资源（assets）输出目录暂无官方文档，这里同时写入多种常见命名（值均为 dist）：
+//   ESA 识别其中任意一个即完成配置；未识别的字段会被忽略，无副作用。
+//   若本次仍提示 "Assets directory not set"，请在 ESA 控制台 → 构建配置 →
+//   输出目录(outputDir) 手动填 dist 保存（控制台设置最终兜底，必定生效）。
 {
   "installCommand": "",
   "buildCommand": "npm run build",
 
+  "outputDir": "dist",
   "assets": "dist",
   "assetsDirectory": "dist",
   "assetsDir": "dist",
   "outputDirectory": "dist",
-  "output": "dist"
+  "output": "dist",
+  "distDir": "dist",
+  "publish": "dist",
+  "publishDir": "dist"
 }
