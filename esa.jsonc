@@ -1,24 +1,17 @@
-// 阿里云 ESA 构建配置（jsonc 支持注释）
+// 阿里云 ESA Pages 构建配置（jsonc 支持注释）
+// 官方文档：https://help.aliyun.com/zh/edge-security-acceleration/esa/user-guide/build-pages
 //
-// 已验证生效的字段：
-//   installCommand  — 留空跳过依赖安装（日志 "installCommand is empty, skipping installation"）
-//   buildCommand    — 构建命令（日志 "Using buildCommand in esa.jsonc"）
-//
-// 静态资源（assets）输出目录暂无官方文档，这里同时写入多种常见命名（值均为 dist）：
-//   ESA 识别其中任意一个即完成配置；未识别的字段会被忽略，无副作用。
-//   若本次仍提示 "Assets directory not set"，请在 ESA 控制台 → 构建配置 →
-//   输出目录(outputDir) 手动填 dist 保存（控制台设置最终兜底，必定生效）。
+// 本站为纯静态站点：
+//   installCommand ""  → 跳过依赖安装（官方：空字符串即跳过）
+//   buildCommand       → node build.js 把站点文件复制到 dist/
+//   assets.directory   → 静态托管 dist/ 目录（注意：assets 是对象，不是字符串）
+//   未配置 entry（边缘函数入口）与 notFoundStrategy（未知路径默认返回 404，
+//   与 Docker 版 nginx 的 try_files =404 行为一致）。
 {
+  "name": "mywebsite",
   "installCommand": "",
   "buildCommand": "npm run build",
-
-  "outputDir": "dist",
-  "assets": "dist",
-  "assetsDirectory": "dist",
-  "assetsDir": "dist",
-  "outputDirectory": "dist",
-  "output": "dist",
-  "distDir": "dist",
-  "publish": "dist",
-  "publishDir": "dist"
+  "assets": {
+    "directory": "./dist"
+  }
 }
