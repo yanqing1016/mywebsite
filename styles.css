@@ -1,4 +1,4 @@
-/* 青岩 · 门户 v3 —— 背景图 + 蓝色粒子环绕光效 */
+/* 青岩 · 门户 v4 —— 背景图 + 蓝色粒子环绕光效（双屏结构） */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -6,22 +6,26 @@
   --text: #e8f1ff;
   --muted: #8fa3c7;
   --blue: #3aa0ff;
-  --blue-soft: rgba(58, 160, 255, 0.35);
   --dsp: #38bdf8;
   --sfy: #fb923c;
+  --music: #4dba87;
 }
 
 html, body { height: 100%; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
 
 body {
   background: var(--bg) url("bg.jpg") center / cover no-repeat fixed;
   color: var(--text);
   font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  overflow: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
-/* 暗色遮罩：压暗背景图，保证标题与按钮可读、蓝色粒子突出 */
+/* 暗色遮罩：压暗背景图，保证标题与按钮可读、粒子突出（两屏共用） */
 body::before {
   content: "";
   position: fixed;
@@ -33,7 +37,7 @@ body::before {
   pointer-events: none;
 }
 
-/* 粒子画布：透明底，叠在背景图之上 */
+/* 粒子画布：透明底、固定铺满，两屏共享同一粒子层 */
 #bg {
   position: fixed;
   inset: 0;
@@ -43,22 +47,24 @@ body::before {
   z-index: 0;
 }
 
-/* 中央内容：标题略偏上，按钮贴视口下部，中间让位给粒子光效 */
+main { position: relative; z-index: 1; }
+
+section { scroll-snap-align: start; }
+
+/* ---------- 第一屏：青岩 ---------- */
 .hero {
-  position: relative;
-  z-index: 1;
   height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0;
-  padding: 24px 24px clamp(56px, 11vh, 110px);
+  justify-content: center;
+  position: relative;
   text-align: center;
+  padding: 24px;
 }
 
 .brand {
-  margin-top: auto; /* 与 .entries 的 auto 上下均分剩余空间，标题落在中偏上 */
+  margin-top: -6vh; /* 视觉重心略偏上，给底部下滑指示留出空间 */
   font-size: clamp(52px, 11vw, 104px);
   font-weight: 700;
   letter-spacing: clamp(8px, 2.2vw, 24px);
@@ -85,9 +91,73 @@ body::before {
   color: var(--muted);
 }
 
-/* 两个入口按钮：auto 顶到视口下部（上方留出 padding-bottom 距离页脚） */
+/* 下滑指示：文字 + 三个向下的大于号，依次亮起 */
+.scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(28px, 6vh, 64px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.scroll-hint:hover { color: var(--blue); }
+
+.scroll-hint .txt {
+  font-size: 13px;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+}
+
+.scroll-hint .chevs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 44px;
+  overflow: hidden;
+}
+.scroll-hint .chevs span {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 16px;
+  transform: rotate(90deg);
+  animation: chev 1.6s ease-in-out infinite;
+}
+.scroll-hint .chevs span:nth-child(2) { animation-delay: 0.2s; }
+.scroll-hint .chevs span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes chev {
+  0%, 100% { opacity: 0.25; transform: rotate(90deg) translateX(-3px); }
+  50%      { opacity: 1;    transform: rotate(90deg) translateX(3px); }
+}
+
+/* ---------- 第二屏：功能选择 ---------- */
+.panel {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 48px 24px 24px;
+  text-align: center;
+  position: relative;
+}
+
+.panel-title {
+  font-size: clamp(13px, 1.8vw, 16px);
+  letter-spacing: 0.45em;
+  text-indent: 0.45em;
+  color: var(--muted);
+  margin-bottom: clamp(32px, 7vh, 64px);
+}
+
+/* 三个入口按钮 */
 .entries {
-  margin-top: auto;
   display: flex;
   gap: clamp(16px, 3vw, 32px);
   flex-wrap: wrap;
@@ -98,7 +168,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 16px;
-  min-width: min(320px, 82vw);
+  min-width: min(300px, 82vw);
   padding: 18px 26px;
   border: 1px solid rgba(58, 160, 255, 0.28);
   border-radius: 14px;
@@ -121,6 +191,7 @@ body::before {
 }
 .entry.dsp .ico { color: var(--dsp); background: rgba(56, 189, 248, 0.10); border: 1px solid rgba(56, 189, 248, 0.35); }
 .entry.sfy .ico { color: var(--sfy); background: rgba(251, 146, 60, 0.10); border: 1px solid rgba(251, 146, 60, 0.35); }
+.entry.music .ico { color: var(--music); background: rgba(77, 186, 135, 0.10); border: 1px solid rgba(77, 186, 135, 0.35); }
 
 .entry .txt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
 .entry .zh { font-size: 17px; letter-spacing: 2px; }
@@ -135,14 +206,17 @@ body::before {
   border-color: var(--sfy);
   box-shadow: 0 0 24px rgba(251, 146, 60, 0.30), inset 0 0 18px rgba(251, 146, 60, 0.07);
 }
+.entry.music:hover {
+  border-color: var(--music);
+  box-shadow: 0 0 24px rgba(77, 186, 135, 0.30), inset 0 0 18px rgba(77, 186, 135, 0.07);
+}
 
-/* 底部信息 */
+/* 页脚：放在第二屏底部 */
 .foot {
-  position: fixed;
+  position: absolute;
   left: 0;
   right: 0;
-  bottom: 10px;
-  z-index: 1;
+  bottom: 14px;
   text-align: center;
   color: var(--muted);
   font-size: 11px;
@@ -157,7 +231,8 @@ body::before {
   .entry { min-width: 0; }
 }
 
-/* 减少动态效果偏好：停用呼吸灯 */
+/* 减少动态效果偏好：停用呼吸灯与箭头动画 */
 @media (prefers-reduced-motion: reduce) {
   .brand { animation: none; }
+  .scroll-hint .chevs span { animation: none; opacity: 0.7; }
 }

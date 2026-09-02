@@ -5,37 +5,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#000000" />
 <title>青岩 · 游戏产线计算器</title>
-<link rel="stylesheet" href="styles.css?v=4.2" />
+<link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas>
 
-<main class="hero">
-  <h1 class="brand">青岩</h1>
-  <p class="tagline">GAME PRODUCTION CALCULATORS</p>
-  <nav class="entries">
-    <a class="entry dsp" href="dsp/">
-      <span class="ico">◉</span>
-      <span class="txt">
-        <span class="zh">戴森球计划 · 计算器</span>
-        <span class="en">Dyson Sphere Program</span>
-      </span>
+<main>
+  <!-- 第一屏：青岩 -->
+  <section class="hero" id="top">
+    <h1 class="brand">青岩</h1>
+    <p class="tagline">GAME TOOLS</p>
+    <a class="scroll-hint" href="#functions" aria-label="下滑查看功能">
+      <span class="txt">下滑</span>
+      <span class="chevs" aria-hidden="true"><span>&gt;</span><span>&gt;</span><span>&gt;</span></span>
     </a>
-    <a class="entry sfy" href="satisfactory/">
-      <span class="ico">⚙</span>
-      <span class="txt">
-        <span class="zh">幸福工厂 · 计算器</span>
-        <span class="en">Satisfactory 1.0</span>
-      </span>
-    </a>
-  </nav>
+  </section>
+
+  <!-- 第二屏：功能选择 -->
+  <section class="panel" id="functions">
+    <p class="panel-title">功能导航 · FUNCTION</p>
+    <nav class="entries">
+      <a class="entry dsp" href="dsp/">
+        <span class="ico">◉</span>
+        <span class="txt">
+          <span class="zh">戴森球计划 · 计算器</span>
+          <span class="en">Dyson Sphere Program</span>
+        </span>
+      </a>
+      <a class="entry sfy" href="satisfactory/">
+        <span class="ico">⚙</span>
+        <span class="txt">
+          <span class="zh">幸福工厂 · 计算器</span>
+          <span class="en">Satisfactory 1.0</span>
+        </span>
+      </a>
+      <a class="entry music" href="music/">
+        <span class="ico">♪</span>
+        <span class="txt">
+          <span class="zh">音乐解锁</span>
+          <span class="en">Unlock Music · NCM / QMC / MFLAC</span>
+        </span>
+      </a>
+    </nav>
+    <footer class="foot">
+      <p>数据来源：BWIKI 戴森球计划公式合集 · SatisfactoryTools / satisfactory-calculator.com · UnlockMusic</p>
+      <p class="ver">v5</p>
+    </footer>
+  </section>
 </main>
 
-<footer class="foot">
-  <p>数据来源：BWIKI 戴森球计划公式合集 · SatisfactoryTools / satisfactory-calculator.com</p>
-  <p class="ver">v4</p>
-</footer>
-
-<script src="particles.js?v=4.3"></script>
+<script src="particles.js?v=5"></script>
 </body>
 </html>
