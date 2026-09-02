@@ -1,0 +1,10 @@
+// 阿里云 ESA 构建配置（jsonc 支持注释）
+// 本站为纯静态站点：无依赖安装（installCommand 留空），
+// 构建仅执行 build.js 把站点文件复制到 dist/，部署输出目录为 dist。
+// 若 ESA 控制台的构建设置与本文件不一致，以控制台设置为准；
+// 字段名如与 ESA 当前版本不完全匹配，ESA 会忽略未知字段并回退默认值，无副作用。
+{
+  "installCommand": "",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
+}

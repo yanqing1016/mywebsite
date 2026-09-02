@@ -1,0 +1,5 @@
+# Node
+node_modules/
+
+# 静态托管构建产物（ESA 每次 CI 构建时由 build.js 重新生成）
+dist/

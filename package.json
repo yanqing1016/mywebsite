@@ -1,0 +1,9 @@
+{
+  "name": "qingyan-calc-site",
+  "version": "4.0.0",
+  "private": true,
+  "description": "青岩 · 游戏产线计算器 —— 纯静态站点（无 npm 依赖，build 仅把站点文件复制到 dist/ 供静态托管使用）",
+  "scripts": {
+    "build": "node build.js"
+  }
+}

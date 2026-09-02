@@ -24,12 +24,30 @@ http://<主机IP>:2028/satisfactory/ → 幸福工厂 产线计算器
     ├── bg.jpg           # 背景图（1920×1080 压缩版）
     ├── dsp/             # 戴森球计算器 app 原样副本
     ├── satisfactory/    # 幸福工厂计算器 app 原样副本
+    ├── package.json     # 静态托管构建入口（无依赖，build = node build.js）
+    ├── build.js         # 构建脚本：校验入口文件 + 复制站点到 dist/
+    ├── esa.jsonc        # 阿里云 ESA 构建配置（installCommand/buildCommand/outputDirectory）
+    ├── .gitignore       # 忽略 node_modules/ 与 dist/（构建产物）
     ├── Dockerfile
     ├── nginx.conf
     ├── docker-compose.yml
     ├── .dockerignore
     └── README.md
 ```
+
+## 部署（阿里云 ESA / GitHub 仓库静态托管）
+
+仓库 [yanqing1016/mywebsite](https://github.com/yanqing1016/mywebsite) 的根目录就是站点根（index.html、dsp/、satisfactory/……），可直接在 ESA「Pages/站点托管」里从 Git 构建。
+
+**此前构建失败的原因**：ESA 的默认构建流程是 `npm install` → `npm run build`（Node 22）。仓库里没有 `package.json` 时，安装步骤能跳过，但构建步骤直接执行 npm 就报 `ENOENT: no such file or directory ... package.json` 而失败；`esa.jsonc` 是 ESA 的可选构建配置文件，缺失只会记一条日志并回退默认值。
+
+**v4 已修复**（原地补充，不影响 Docker 部署）：
+
+- `package.json`：零依赖，仅声明 `"build": "node build.js"`，让 ESA 的默认构建命令能跑通。
+- `build.js`：构建 = 校验入口文件存在 + 把站点文件复制到 `dist/` + 生成 `build_info.txt`（Node 16.7+ 标准库，ESA 的 Node 22 直接可用）。
+- `esa.jsonc`：声明安装命令留空、构建命令 `npm run build`、输出目录 `dist`；字段名按 ESA 日志推导，若与控制台设置不一致，以控制台为准。
+
+ESA 控制台里对应设置（若面板可填）：安装命令留空、构建命令 `npm run build`、**输出目录 `dist`**。推送到 main 分支后触发重建，构建成功后通过 `https://<你的域名>/build_info.txt` 验证是否为新构建。
 
 ## 部署（NAS / 任意 Docker 主机）
 
@@ -64,6 +82,7 @@ robocopy D:\test\幸福工厂计算器\app D:\test\网站\v4\satisfactory  /MIR
 - **v3**：「青岩」调小；新增背景图（压缩 1920×1080）+ 暗色遮罩，粒子改透明拖尾；目录结构对齐镜像布局。
 - **v4**：粒子改为绿蓝交替，密度增加一倍（210 → 420 颗）。
 - **v4 修订**（原地更新，不另开版本）：两个入口按钮下移贴到视口下部（标题中偏上、按钮距底部约 11vh），中间完全让位给粒子光效；粒子更小更细腻、密度 420 → 600 颗、绿蓝色相进一步拉开（118–138 对 210–226）提高对比度；缓存参数 `styles.css?v=4.2`、`particles.js?v=4.3`。
+- **v4 修订 2**（原地更新）：修复阿里云 ESA 从 Git 构建失败的问题——新增 `package.json`、`build.js`、`esa.jsonc`、`.gitignore`，构建 = 复制站点到 `dist/`；Docker 部署不受影响。
 
 ## 许可
 
