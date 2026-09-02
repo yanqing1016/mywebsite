@@ -1,0 +1,16 @@
+services:
+  calc-portal:
+    build: .
+    image: calc-portal:latest
+    container_name: calc-portal
+    restart: unless-stopped
+    ports:
+      - "2028:80"   # 左侧改成你希望对外暴露的端口
+    # 重要：不要给 /usr/share/nginx/html 挂载任何卷/目录映射。
+    # 空的绑定挂载会覆盖镜像内置的静态文件，导致 403 Forbidden。
+    # 文件已在构建时打包进镜像，无需额外挂载。
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3

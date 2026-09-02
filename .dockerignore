@@ -1,0 +1,5 @@
+# 文档与 Docker 自身文件（compose 会单独读取，无需进入构建上下文）
+*.md
+Dockerfile
+docker-compose.yml
+.dockerignore

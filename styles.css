@@ -1,0 +1,163 @@
+/* 青岩 · 门户 v3 —— 背景图 + 蓝色粒子环绕光效 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #000000;
+  --text: #e8f1ff;
+  --muted: #8fa3c7;
+  --blue: #3aa0ff;
+  --blue-soft: rgba(58, 160, 255, 0.35);
+  --dsp: #38bdf8;
+  --sfy: #fb923c;
+}
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg) url("bg.jpg") center / cover no-repeat fixed;
+  color: var(--text);
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 暗色遮罩：压暗背景图，保证标题与按钮可读、蓝色粒子突出 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 42%, rgba(0, 0, 0, 0.18) 30%, rgba(0, 0, 0, 0.62) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.30) 45%, rgba(0, 0, 0, 0.58));
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 粒子画布：透明底，叠在背景图之上 */
+#bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+}
+
+/* 中央内容：标题略偏上，按钮贴视口下部，中间让位给粒子光效 */
+.hero {
+  position: relative;
+  z-index: 1;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 24px 24px clamp(56px, 11vh, 110px);
+  text-align: center;
+}
+
+.brand {
+  margin-top: auto; /* 与 .entries 的 auto 上下均分剩余空间，标题落在中偏上 */
+  font-size: clamp(52px, 11vw, 104px);
+  font-weight: 700;
+  letter-spacing: clamp(8px, 2.2vw, 24px);
+  text-indent: clamp(8px, 2.2vw, 24px); /* 抵消最后一个字的字距，保证视觉居中 */
+  line-height: 1.1;
+  color: var(--text);
+  text-shadow:
+    0 0 18px rgba(58, 160, 255, 0.55),
+    0 0 60px rgba(58, 160, 255, 0.30),
+    0 0 140px rgba(58, 160, 255, 0.20);
+  animation: breathe 6s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { text-shadow: 0 0 18px rgba(58, 160, 255, 0.55), 0 0 60px rgba(58, 160, 255, 0.30), 0 0 140px rgba(58, 160, 255, 0.20); }
+  50%      { text-shadow: 0 0 26px rgba(58, 160, 255, 0.80), 0 0 90px rgba(58, 160, 255, 0.45), 0 0 180px rgba(58, 160, 255, 0.28); }
+}
+
+.tagline {
+  margin-top: 18px;
+  font-size: clamp(10px, 1.6vw, 13px);
+  letter-spacing: 0.55em;
+  text-indent: 0.55em;
+  color: var(--muted);
+}
+
+/* 两个入口按钮：auto 顶到视口下部（上方留出 padding-bottom 距离页脚） */
+.entries {
+  margin-top: auto;
+  display: flex;
+  gap: clamp(16px, 3vw, 32px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: min(320px, 82vw);
+  padding: 18px 26px;
+  border: 1px solid rgba(58, 160, 255, 0.28);
+  border-radius: 14px;
+  background: rgba(2, 10, 24, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: var(--text);
+  text-decoration: none;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.entry .ico {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  border-radius: 12px;
+  flex: none;
+}
+.entry.dsp .ico { color: var(--dsp); background: rgba(56, 189, 248, 0.10); border: 1px solid rgba(56, 189, 248, 0.35); }
+.entry.sfy .ico { color: var(--sfy); background: rgba(251, 146, 60, 0.10); border: 1px solid rgba(251, 146, 60, 0.35); }
+
+.entry .txt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.entry .zh { font-size: 17px; letter-spacing: 2px; }
+.entry .en { font-size: 11px; letter-spacing: 1px; color: var(--muted); }
+
+.entry:hover { transform: translateY(-3px); }
+.entry.dsp:hover {
+  border-color: var(--dsp);
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.35), inset 0 0 18px rgba(56, 189, 248, 0.08);
+}
+.entry.sfy:hover {
+  border-color: var(--sfy);
+  box-shadow: 0 0 24px rgba(251, 146, 60, 0.30), inset 0 0 18px rgba(251, 146, 60, 0.07);
+}
+
+/* 底部信息 */
+.foot {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  z-index: 1;
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.8;
+  opacity: 0.75;
+  pointer-events: none;
+}
+.foot .ver { opacity: 0.6; letter-spacing: 2px; }
+
+@media (max-width: 560px) {
+  .entries { flex-direction: column; align-items: stretch; width: 100%; max-width: 360px; }
+  .entry { min-width: 0; }
+}
+
+/* 减少动态效果偏好：停用呼吸灯 */
+@media (prefers-reduced-motion: reduce) {
+  .brand { animation: none; }
+}
