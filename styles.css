@@ -1,4 +1,4 @@
-/* 青岩 · 门户 v4 —— 背景图 + 蓝色粒子环绕光效（双屏结构） */
+/* 青岩 · 门户 v5 —— 背景图 + 粒子光效（分页式双页结构） */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -15,7 +15,8 @@ html, body { height: 100%; }
 
 html {
   scroll-behavior: smooth;
-  scroll-snap-type: y proximity;
+  /* 分页式滚动：mandatory 强制贴合整屏，翻页即平滑过渡动画 */
+  scroll-snap-type: y mandatory;
 }
 
 body {
@@ -25,7 +26,7 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-/* 暗色遮罩：压暗背景图，保证标题与按钮可读、粒子突出（两屏共用） */
+/* 暗色遮罩：压暗背景图，保证标题与按钮可读（两页共用） */
 body::before {
   content: "";
   position: fixed;
@@ -37,7 +38,7 @@ body::before {
   pointer-events: none;
 }
 
-/* 粒子画布：透明底、固定铺满，两屏共享同一粒子层 */
+/* 粒子画布：透明底、固定铺满；随滚动淡出（第二页仅背景），透明度由 particles.js 控制 */
 #bg {
   position: fixed;
   inset: 0;
@@ -45,6 +46,7 @@ body::before {
   height: 100%;
   display: block;
   z-index: 0;
+  will-change: opacity;
 }
 
 main { position: relative; z-index: 1; }
@@ -156,6 +158,17 @@ section { scroll-snap-align: start; }
   margin-bottom: clamp(32px, 7vh, 64px);
 }
 
+/* 第二页内容入场动画：JS 环境下先隐藏，滚入视口后上浮淡入（无 JS 直接显示） */
+html.js .panel-inner {
+  opacity: 0;
+  transform: translateY(48px);
+  transition: opacity 0.8s ease 0.15s, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+}
+html.js .panel.visible .panel-inner {
+  opacity: 1;
+  transform: none;
+}
+
 /* 三个入口按钮 */
 .entries {
   display: flex;
@@ -231,8 +244,10 @@ section { scroll-snap-align: start; }
   .entry { min-width: 0; }
 }
 
-/* 减少动态效果偏好：停用呼吸灯与箭头动画 */
+/* 减少动态效果偏好：停用呼吸灯、箭头、入场动画与平滑翻页 */
 @media (prefers-reduced-motion: reduce) {
   .brand { animation: none; }
   .scroll-hint .chevs span { animation: none; opacity: 0.7; }
+  html.js .panel-inner { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
 }

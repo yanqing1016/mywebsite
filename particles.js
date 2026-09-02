@@ -21,6 +21,7 @@
   var rafId = 0;
   var running = true;
   var t = 0;                 // 全局时间（秒）
+  var fadedOut = false;      // 滚到第二页且完全淡出时为 true（暂停绘制）
 
   // 轨道组：radius 相对于屏幕短边；tilt = 纵向压扁比；speed 角速度（弧度/秒）
   var RINGS = [
@@ -164,10 +165,25 @@
     if (!last) last = now;
     var dt = Math.min((now - last) / 1000, 0.05);
     last = now;
-    drawFrame(dt, false);
+    if (!fadedOut) drawFrame(dt, false); // 第二页完全淡出后暂停绘制，省 CPU
     rafId = requestAnimationFrame(loop);
   }
   var last = 0;
+
+  /* 滚动淡出：第一页粒子完整显示，翻到第二页平滑淡出至 0（仅剩背景图） */
+  var fadeRaf = 0;
+  function updateFade() {
+    fadeRaf = 0;
+    var vh = window.innerHeight || 1;
+    var p = Math.min(1, Math.max(0, (window.scrollY || window.pageYOffset || 0) / vh));
+    canvas.style.opacity = (1 - p).toFixed(3);
+    fadedOut = p >= 1;
+  }
+  function onScroll() {
+    if (!fadeRaf) fadeRaf = requestAnimationFrame(updateFade);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
 
   HUES.forEach(function (h) { sprites[h] = makeSprite(h); });
 
@@ -189,5 +205,6 @@
   });
 
   resize();
+  updateFade(); // 同步初始透明度（浏览器可能恢复上次滚动位置）
   if (!reduceMotion) rafId = requestAnimationFrame(loop);
 })();
