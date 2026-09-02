@@ -4,7 +4,7 @@
  * 本站是纯静态站点：构建 = 校验入口文件存在 + 把站点文件原样复制到 dist/。
  * 零依赖，只需 Node 16.7+（fs.cpSync），在 ESA 的 Node 22 构建环境直接可用。
  *
- * 计算器目录 dsp/、satisfactory/ 支持两种提供方式（二选一，目录优先）：
+ * 计算器目录 dsp/、satisfactory/ 与音乐解锁 music/ 支持两种提供方式（二选一，目录优先）：
  *   1. 仓库里直接有 dsp/、satisfactory/ 目录；
  *   2. 仓库根有 dsp.zip、satisfactory.zip（构建时自动解压进 dist/，仓库保持整洁）。
  *
@@ -21,7 +21,7 @@ const DIST = path.join(ROOT, "dist");
 
 // 站点文件清单（仓库根 = 站点根）
 const FILES = ["index.html", "styles.css", "particles.js", "bg.jpg"];
-const DIRS = ["dsp", "satisfactory"];
+const DIRS = ["dsp", "satisfactory", "music"];
 
 // 构建前校验：入口缺失立即失败，把问题暴露在构建期而不是部署后
 for (const f of FILES) {
