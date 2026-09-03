@@ -15,14 +15,13 @@
   <!-- 第一页：青岩（背景 + 粒子光效 + 大字） -->
   <section class="hero" id="top">
     <h1 class="brand">青岩</h1>
-    <p class="tagline">GAME TOOLS</p>
     <a class="scroll-hint" href="#functions" aria-label="下滑查看功能">
       <span class="txt">下滑</span>
       <span class="chevs" aria-hidden="true"><span>&gt;</span><span>&gt;</span><span>&gt;</span></span>
     </a>
   </section>
 
-  <!-- 第二页：功能导航（四个功能 2×2，点击进入各自界面） -->
+  <!-- 第二页：功能导航（每排两个，点击进入各自界面） -->
   <section class="panel" id="functions">
     <div class="panel-inner">
       <p class="panel-title">功能导航 · FUNCTION</p>
@@ -55,12 +54,29 @@
             <span class="en">BIN · OCT · DEC · HEX</span>
           </span>
         </button>
+        <a class="entry deriv" href="derivative/">
+          <span class="ico">∂</span>
+          <span class="txt">
+            <span class="zh">导数计算器</span>
+            <span class="en">DERIVATIVE</span>
+          </span>
+        </a>
+        <a class="entry integ" href="integral/">
+          <span class="ico">∫</span>
+          <span class="txt">
+            <span class="zh">积分计算器</span>
+            <span class="en">INTEGRAL</span>
+          </span>
+        </a>
+        <button type="button" class="entry study" id="openStudy">
+          <span class="ico">✦</span>
+          <span class="txt">
+            <span class="zh">学习资料</span>
+            <span class="en">STUDY FILES</span>
+          </span>
+        </button>
       </nav>
     </div>
-    <footer class="foot">
-      <p>数据来源：BWIKI 戴森球计划公式合集 · SatisfactoryTools / satisfactory-calculator.com · UnlockMusic</p>
-      <p class="ver">v6</p>
-    </footer>
   </section>
 </main>
 
@@ -93,6 +109,25 @@
   </div>
 </div>
 
+<!-- 二级界面：学习资料（分享链接） -->
+<div class="base-overlay" id="learnOverlay" aria-hidden="true">
+  <div class="base-panel">
+    <div class="base-head">
+      <button type="button" class="base-back" id="learnBack">← 返回功能导航</button>
+      <p class="base-title">学习资料 · STUDY FILES</p>
+    </div>
+    <a class="study-link" href="https://ug.link/yanqing-nas/filemgr/share-download/?id=6dfbdebbed874efa9a46d42a24cabe58" target="_blank" rel="noopener">
+      <span class="study-ico">✦</span>
+      <span class="study-txt">
+        <span class="study-zh">打开资料分享</span>
+        <span class="study-en">在浏览器新标签页中下载</span>
+      </span>
+      <span class="study-go">↗</span>
+    </a>
+    <p class="base-tip">链接由你的 NAS（ug.link）提供，文件更新无需改动网站。</p>
+  </div>
+</div>
+
 <script src="particles.js?v=6"></script>
 <script>
   /* 第二页入场动画：进入视口加 .visible 触发交错上浮；离开时移除，
@@ -119,7 +154,10 @@
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var acc = 0, locked = false, decay = 0;
     var THRESHOLD = 60, LOCK_MS = 1100;
-    var overlay = document.getElementById("baseOverlay");
+    function anyOverlayOpen() {
+      var a = document.getElementById("baseOverlay"), b = document.getElementById("learnOverlay");
+      return (a && a.classList.contains("open")) || (b && b.classList.contains("open"));
+    }
 
     function flip(dir) {
       locked = true;
@@ -130,7 +168,7 @@
     }
 
     window.addEventListener("wheel", function (e) {
-      if (overlay && overlay.classList.contains("open")) { e.preventDefault(); return; }
+      if (anyOverlayOpen()) { e.preventDefault(); return; }
       var vh = window.innerHeight || 1;
       var onFirst = (window.scrollY || window.pageYOffset || 0) < vh / 2;
       var goingDown = e.deltaY > 0;
@@ -148,25 +186,29 @@
 
   /* 二级界面开关：卡片点击 / 返回按钮 / Esc / 点击遮罩 */
   (function () {
-    var overlay = document.getElementById("baseOverlay");
-    var openBtn = document.getElementById("openBase");
-    var backBtn = document.getElementById("baseBack");
-    if (!overlay || !openBtn) return;
-    function setOpen(open) {
-      overlay.classList.toggle("open", open);
-      overlay.setAttribute("aria-hidden", open ? "false" : "true");
-      if (open) {
-        var first = overlay.querySelector("input");
-        if (first) setTimeout(function () { first.focus(); }, 420);
+    var overlays = [
+      { overlay: document.getElementById("baseOverlay"), openBtn: document.getElementById("openBase") },
+      { overlay: document.getElementById("learnOverlay"), openBtn: document.getElementById("openStudy") }
+    ];
+    overlays.forEach(function (item) {
+      if (!item.overlay || !item.openBtn) return;
+      var back = item.overlay.querySelector(".base-back");
+      function setOpen(open) {
+        item.overlay.classList.toggle("open", open);
+        item.overlay.setAttribute("aria-hidden", open ? "false" : "true");
+        if (open) {
+          var first = item.overlay.querySelector("input, a.study-link");
+          if (first) setTimeout(function () { first.focus(); }, 420);
+        }
       }
-    }
-    openBtn.addEventListener("click", function () { setOpen(true); });
-    backBtn.addEventListener("click", function () { setOpen(false); });
-    overlay.addEventListener("click", function (e) {
-      if (e.target === overlay) setOpen(false);
-    });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && overlay.classList.contains("open")) setOpen(false);
+      item.openBtn.addEventListener("click", function () { setOpen(true); });
+      if (back) back.addEventListener("click", function () { setOpen(false); });
+      item.overlay.addEventListener("click", function (e) {
+        if (e.target === item.overlay) setOpen(false);
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && item.overlay.classList.contains("open")) setOpen(false);
+      });
     });
   })();
 
