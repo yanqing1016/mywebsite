@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#000000" />
 <title>青岩 · 游戏产线计算器</title>
-<link rel="stylesheet" href="styles.css?v=6.4" />
+<link rel="stylesheet" href="styles.css?v=6.5" />
 <script>document.documentElement.className += " js";</script>
 </head>
 <body>
@@ -185,6 +185,23 @@
       if (acc >= THRESHOLD) flip(1);
       else if (acc <= -THRESHOLD) flip(-1);
     }, { passive: false });
+  })();
+
+  /* 进入功能的过渡动画：点击功能卡片先整页淡出，280ms 后跳转；
+     从浏览器缓存返回（bfcache）时移除淡出态，避免白屏。 */
+  (function () {
+    Array.prototype.forEach.call(document.querySelectorAll("a.entry[href]"), function (link) {
+      link.addEventListener("click", function (e) {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        var href = link.getAttribute("href");
+        document.documentElement.classList.add("qy-exit");
+        setTimeout(function () { location.href = href; }, 280);
+      });
+    });
+    window.addEventListener("pageshow", function (e) {
+      if (e.persisted) document.documentElement.classList.remove("qy-exit");
+    });
   })();
 
   /* 二级界面开关：卡片点击 / 返回按钮 / Esc / 点击遮罩 */
