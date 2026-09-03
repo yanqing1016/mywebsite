@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#000000" />
 <title>青岩 · 游戏产线计算器</title>
-<link rel="stylesheet" href="styles.css?v=6.3" />
+<link rel="stylesheet" href="styles.css?v=6.4" />
 <script>document.documentElement.className += " js";</script>
 </head>
 <body>
+<div class="page-bg" aria-hidden="true"></div>
 <canvas id="bg" aria-hidden="true"></canvas>
 
 <main>
@@ -90,22 +91,22 @@
     <div class="base-grid">
       <label class="base-cell">
         <span class="base-name">二进制 <i>BIN</i></span>
-        <input type="text" data-base="2" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
+        <input type="text" data-base="2" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="如 1010.1">
       </label>
       <label class="base-cell">
         <span class="base-name">八进制 <i>OCT</i></span>
-        <input type="text" data-base="8" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
+        <input type="text" data-base="8" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="如 12.4">
       </label>
       <label class="base-cell">
         <span class="base-name">十进制 <i>DEC</i></span>
-        <input type="text" data-base="10" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
+        <input type="text" data-base="10" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="如 10.5">
       </label>
       <label class="base-cell">
         <span class="base-name">十六进制 <i>HEX</i></span>
-        <input type="text" data-base="16" autocomplete="off" spellcheck="false" placeholder="0">
+        <input type="text" data-base="16" autocomplete="off" spellcheck="false" placeholder="如 A.8">
       </label>
     </div>
-    <p class="base-tip">在任意格输入，其余三格实时换算（BigInt 精确换算，大数不丢精度）</p>
+    <p class="base-tip">在任意格输入，其余三格实时换算（支持小数，如 10.5；BigInt 精确换算，大数不丢精度；无限小数以 … 截断提示）</p>
   </div>
 </div>
 
@@ -139,6 +140,8 @@
       var io = new IntersectionObserver(function (entries) {
         for (var i = 0; i < entries.length; i++) {
           panel.classList.toggle("visible", entries[i].isIntersecting);
+          /* 翻到功能页时给背景图层加模糊（CSS 过渡渐变） */
+          document.body.classList.toggle("at-functions", entries[i].isIntersecting);
         }
       }, { threshold: 0.35 });
       io.observe(panel);
@@ -212,20 +215,77 @@
     });
   })();
 
-  /* 进制转换：任一格输入，实时换算其余三格（BigInt 保证大数精度）。
-     非法字符：所在格子标红提示，不影响其他格子。 */
+  /* 进制转换：任一格输入，实时换算其余三格。
+     支持小数：内部用 BigInt 有理数（num/den）精确换算，
+     目标进制能精确表示则完整输出；无限小数按位数上限截断并以 … 提示。 */
   (function () {
-    var RULES = { 2: /^[01]+$/, 8: /^[0-7]+$/, 10: /^[0-9]+$/, 16: /^[0-9a-fA-F]+$/ };
-    var PREFIX = { 2: "0b", 8: "0o", 10: "", 16: "0x" };
+    var RULES = {
+      2:  /^-?([01]+(\.[01]*)?|\.[01]+)$/,
+      8:  /^-?([0-7]+(\.[0-7]*)?|\.[0-7]+)$/,
+      10: /^-?([0-9]+(\.[0-9]*)?|\.[0-9]+)$/,
+      16: /^-?([0-9a-fA-F]+(\.[0-9a-fA-F]*)?|\.[0-9a-fA-F]+)$/
+    };
+    var MAXFRAC = { 2: 24, 8: 10, 10: 14, 16: 6 };
     var inputs = Array.prototype.slice.call(document.querySelectorAll(".base-grid input"));
     if (inputs.length !== 4) return;
 
     function cellOf(input) { return input.closest(".base-cell"); }
+    function bigGcd(a, b) { while (b) { var t = a % b; a = b; b = t; } return a; }
+
+    /* 解析 base 进制字符串为分数 {num, den}（den > 0） */
+    function parseInBase(str, base) {
+      var neg = str.charAt(0) === "-";
+      if (neg) str = str.slice(1);
+      var parts = str.split(".");
+      var ip = parts[0] || "0";
+      var fp = parts[1] || "";
+      var B = BigInt(base), num = 0n, den = 1n, i;
+      for (i = 0; i < ip.length; i++) num = num * B + BigInt(parseInt(ip[i], base));
+      for (i = 0; i < fp.length; i++) { num = num * B + BigInt(parseInt(fp[i], base)); den *= B; }
+      if (neg) num = -num;
+      return { num: num, den: den };
+    }
+
+    /* 该分数在目标进制下小数点后多少位可精确表示；无限循环小数返回 -1 */
+    function exactFracDigits(den, base) {
+      var d = den, B = BigInt(base), k = 0;
+      while (d > 1n) {
+        var g = bigGcd(d, B);
+        if (g === 1n) return -1;
+        var t = B, kk = 1;
+        while (t < g) { t *= B; kk++; }
+        k += kk;
+        d = d / g;
+      }
+      return k;
+    }
+
+    function formatInBase(v, base) {
+      var neg = v.num < 0n;
+      var n = neg ? -v.num : v.num;
+      var d = v.den;
+      var out = (n / d).toString(base);
+      var rem = n % d;
+      if (rem !== 0n) {
+        var need = exactFracDigits(d / bigGcd(rem, d), base);
+        var limit = need >= 0 ? Math.min(need, 80) : MAXFRAC[base];
+        var frac = "", r = rem, i;
+        for (i = 0; i < limit; i++) {
+          r *= BigInt(base);
+          frac += (r / d).toString(base);
+          r = r % d;
+          if (r === 0n) break;
+        }
+        out += "." + frac;
+        if (r !== 0n) out += "…";
+      }
+      return (neg ? "-" : "") + out.toUpperCase();
+    }
 
     inputs.forEach(function (input) {
       input.addEventListener("input", function () {
         var base = +input.dataset.base;
-        var v = input.value.replace(/\s+/g, "");
+        var v = input.value.replace(/\s+/g, "").replace(/,/g, ".");
         input.value = v;
         cellOf(input).classList.remove("invalid");
 
@@ -235,16 +295,16 @@
           });
           return;
         }
-        if (!RULES[base].test(v)) { cellOf(input).classList.add("invalid"); return; }
+        if (!RULES[base].test(v) || !window.BigInt) { cellOf(input).classList.add("invalid"); return; }
 
-        var big;
-        try { big = BigInt(PREFIX[base] + v.toLowerCase()); }
+        var val;
+        try { val = parseInBase(v, base); }
         catch (err) { cellOf(input).classList.add("invalid"); return; }
 
         inputs.forEach(function (o) {
           var b = +o.dataset.base;
           if (b === base) return;
-          o.value = big.toString(b).toUpperCase();
+          o.value = formatInBase(val, b);
           cellOf(o).classList.remove("invalid");
         });
       });
