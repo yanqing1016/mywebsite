@@ -187,6 +187,76 @@ html.js .panel.visible .entry:nth-child(3) { animation-delay: 0.59s; }
   to   { opacity: 1; transform: none; }
 }
 
+/* 进制转换：2×2 网格，任一格输入实时换算其余三格 */
+html.js .panel:not(.visible) .base-tool {
+  opacity: 0;
+}
+html.js .panel.visible .base-tool {
+  animation: cardIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: 0.76s;
+}
+
+.base-tool {
+  margin-top: clamp(28px, 6vh, 52px);
+  width: 100%;
+  max-width: 620px;
+}
+.base-title {
+  font-size: clamp(11px, 1.4vw, 13px);
+  letter-spacing: 0.45em;
+  text-indent: 0.45em;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.base-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.base-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid rgba(58, 160, 255, 0.28);
+  border-radius: 12px;
+  background: rgba(2, 10, 24, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  text-align: left;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.base-cell .base-name {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--muted);
+}
+.base-cell .base-name i {
+  font-style: normal;
+  color: var(--blue);
+  letter-spacing: 1px;
+}
+.base-cell input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+  font-size: 17px;
+  letter-spacing: 1px;
+  caret-color: var(--blue);
+}
+.base-cell input::placeholder { color: rgba(143, 163, 199, 0.45); }
+.base-cell:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 16px rgba(58, 160, 255, 0.25);
+}
+.base-cell.invalid {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 14px rgba(255, 107, 107, 0.25);
+}
+
 /* 三个入口按钮 */
 .entries {
   display: flex;
@@ -267,8 +337,10 @@ html.js .panel.visible .entry:nth-child(3) { animation-delay: 0.59s; }
   .brand { animation: none; }
   .scroll-hint .chevs span { animation: none; opacity: 0.7; }
   html.js .panel:not(.visible) .panel-title,
-  html.js .panel:not(.visible) .entry { opacity: 1; transform: none; }
+  html.js .panel:not(.visible) .entry,
+  html.js .panel:not(.visible) .base-tool { opacity: 1; transform: none; }
   html.js .panel.visible .panel-title,
-  html.js .panel.visible .entry { animation: none; }
+  html.js .panel.visible .entry,
+  html.js .panel.visible .base-tool { animation: none; }
   html { scroll-behavior: auto; }
 }
