@@ -1,4 +1,4 @@
-/* 青岩 · 门户 v5 —— 背景图 + 粒子光效（分页式双页结构） */
+/* 青岩 · 门户 v6 —— 背景图 + 粒子光效（分页式双页结构） */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -158,15 +158,33 @@ section { scroll-snap-align: start; }
   margin-bottom: clamp(32px, 7vh, 64px);
 }
 
-/* 第二页内容入场动画：JS 环境下先隐藏，滚入视口后上浮淡入（无 JS 直接显示） */
-html.js .panel-inner {
+/* 第二页入场编排（用 animation 而非 transition，避免与按钮 hover 过渡冲突；
+   backwards 填充让交错延迟期间保持初始隐藏态，动画结束后交还 hover 控制）：
+   标题先以较宽字距淡入收拢，随后三张卡片依次上浮登场。 */
+html.js .panel:not(.visible) .panel-title {
   opacity: 0;
-  transform: translateY(48px);
-  transition: opacity 0.8s ease 0.15s, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+  transform: translateY(18px);
 }
-html.js .panel.visible .panel-inner {
-  opacity: 1;
-  transform: none;
+html.js .panel.visible .panel-title {
+  animation: titleIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes titleIn {
+  from { opacity: 0; letter-spacing: 0.9em; text-indent: 0.9em; transform: translateY(18px); }
+  to   { opacity: 1; letter-spacing: 0.45em; text-indent: 0.45em; transform: none; }
+}
+
+html.js .panel:not(.visible) .entry {
+  opacity: 0;
+}
+html.js .panel.visible .entry {
+  animation: cardIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+html.js .panel.visible .entry:nth-child(1) { animation-delay: 0.25s; }
+html.js .panel.visible .entry:nth-child(2) { animation-delay: 0.42s; }
+html.js .panel.visible .entry:nth-child(3) { animation-delay: 0.59s; }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(36px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
 }
 
 /* 三个入口按钮 */
@@ -244,10 +262,13 @@ html.js .panel.visible .panel-inner {
   .entry { min-width: 0; }
 }
 
-/* 减少动态效果偏好：停用呼吸灯、箭头、入场动画与平滑翻页 */
+/* 减少动态效果偏好：停用呼吸灯、箭头、入场编排与平滑翻页 */
 @media (prefers-reduced-motion: reduce) {
   .brand { animation: none; }
   .scroll-hint .chevs span { animation: none; opacity: 0.7; }
-  html.js .panel-inner { opacity: 1; transform: none; transition: none; }
+  html.js .panel:not(.visible) .panel-title,
+  html.js .panel:not(.visible) .entry { opacity: 1; transform: none; }
+  html.js .panel.visible .panel-title,
+  html.js .panel.visible .entry { animation: none; }
   html { scroll-behavior: auto; }
 }
