@@ -346,6 +346,7 @@ html.js .panel.visible .entry:nth-child(7) { animation-delay: 1.04s; }
   gap: clamp(14px, 2.5vw, 24px);
   width: 100%;
   max-width: 920px;
+  margin-inline: auto;   /* 网格整体居中 */
 }
 
 .entry {
