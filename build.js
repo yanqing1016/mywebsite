@@ -21,7 +21,7 @@ const DIST = path.join(ROOT, "dist");
 
 // 站点文件清单（仓库根 = 站点根）
 const FILES = ["index.html", "styles.css", "particles.js", "bg.jpg"];
-const DIRS = ["dsp", "satisfactory", "music"];
+const DIRS = ["dsp", "satisfactory", "music", "derivative", "integral"];
 
 // 构建前校验：入口缺失立即失败，把问题暴露在构建期而不是部署后
 for (const f of FILES) {
