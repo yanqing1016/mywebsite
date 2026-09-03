@@ -20,11 +20,25 @@ html {
 }
 
 body {
-  background: var(--bg) url("bg.jpg") center / cover no-repeat fixed;
+  background: var(--bg);
   color: var(--text);
   font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
   -webkit-text-size-adjust: 100%;
 }
+
+/* 背景图层：独立固定层，翻到功能页时可单独加模糊（不影响前景内容）。
+   外扩 32px 遮住模糊产生的透明边缘。 */
+.page-bg {
+  position: fixed;
+  inset: -32px;
+  z-index: -1;
+  background: url("bg.jpg") center / cover no-repeat;
+  filter: blur(0);
+  transition: filter 0.7s ease;
+  will-change: filter;
+  pointer-events: none;
+}
+body.at-functions .page-bg { filter: blur(14px); }
 
 /* 暗色遮罩：压暗背景图，保证标题与按钮可读（两页共用） */
 body::before {
@@ -437,5 +451,6 @@ html.js .panel.visible .entry:nth-child(7) { animation-delay: 1.04s; }
   html.js .panel.visible .panel-title,
   html.js .panel.visible .entry { animation: none; }
   .base-overlay, .base-panel { transition: none; }
+  .page-bg { transition: none; }
   html { scroll-behavior: auto; }
 }
