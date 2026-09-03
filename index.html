@@ -75,6 +75,38 @@
       panel.classList.add("visible");
     }
   })();
+
+  /* 桌面端：把滚轮识别为整页翻页（而非自由滚动），消除吸附卡顿。
+     阈值累积（兼容触控板小增量）+ 冷却锁（防惯性连翻）；
+     触屏滚动不产生 wheel 事件，不受影响。 */
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var acc = 0, locked = false, decay = 0;
+    var THRESHOLD = 60, LOCK_MS = 1100;
+
+    function flip(dir) {
+      locked = true;
+      acc = 0;
+      var target = dir > 0 ? document.getElementById("functions") : document.getElementById("top");
+      if (target) target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      setTimeout(function () { locked = false; }, reduce ? 150 : LOCK_MS);
+    }
+
+    window.addEventListener("wheel", function (e) {
+      var vh = window.innerHeight || 1;
+      var onFirst = (window.scrollY || window.pageYOffset || 0) < vh / 2;
+      var goingDown = e.deltaY > 0;
+      var isFlipDir = (onFirst && goingDown) || (!onFirst && !goingDown);
+      if (!isFlipDir) return;                 // 非翻页方向：放行给浏览器
+      e.preventDefault();                     // 接管：不让原生滚动与吸附打架
+      if (locked) return;
+      acc += e.deltaY;
+      clearTimeout(decay);
+      decay = setTimeout(function () { acc = 0; }, 240);
+      if (acc >= THRESHOLD) flip(1);
+      else if (acc <= -THRESHOLD) flip(-1);
+    }, { passive: false });
+  })();
 </script>
 </body>
 </html>
