@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#000000" />
 <title>青岩 · 游戏产线计算器</title>
-<link rel="stylesheet" href="styles.css?v=6" />
+<link rel="stylesheet" href="styles.css?v=6.1" />
 <script>document.documentElement.className += " js";</script>
 </head>
 <body>
@@ -49,6 +49,27 @@
           </span>
         </a>
       </nav>
+      <section class="base-tool" aria-label="进制转换">
+        <p class="base-title">进制转换 · BASE CONVERTER</p>
+        <div class="base-grid">
+          <label class="base-cell">
+            <span class="base-name">二进制 <i>BIN</i></span>
+            <input type="text" data-base="2" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
+          </label>
+          <label class="base-cell">
+            <span class="base-name">八进制 <i>OCT</i></span>
+            <input type="text" data-base="8" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
+          </label>
+          <label class="base-cell">
+            <span class="base-name">十进制 <i>DEC</i></span>
+            <input type="text" data-base="10" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
+          </label>
+          <label class="base-cell">
+            <span class="base-name">十六进制 <i>HEX</i></span>
+            <input type="text" data-base="16" autocomplete="off" spellcheck="false" placeholder="0">
+          </label>
+        </div>
+      </section>
     </div>
     <footer class="foot">
       <p>数据来源：BWIKI 戴森球计划公式合集 · SatisfactoryTools / satisfactory-calculator.com · UnlockMusic</p>
@@ -106,6 +127,45 @@
       if (acc >= THRESHOLD) flip(1);
       else if (acc <= -THRESHOLD) flip(-1);
     }, { passive: false });
+  })();
+
+  /* 进制转换：任一格输入，实时换算其余三格（BigInt 保证大数精度）。
+     非法字符：所在格子标红提示，不影响其他格子。 */
+  (function () {
+    var RULES = { 2: /^[01]+$/, 8: /^[0-7]+$/, 10: /^[0-9]+$/, 16: /^[0-9a-fA-F]+$/ };
+    var PREFIX = { 2: "0b", 8: "0o", 10: "", 16: "0x" };
+    var inputs = Array.prototype.slice.call(document.querySelectorAll(".base-grid input"));
+    if (inputs.length !== 4) return;
+
+    function cellOf(input) { return input.closest(".base-cell"); }
+
+    inputs.forEach(function (input) {
+      input.addEventListener("input", function () {
+        var base = +input.dataset.base;
+        var v = input.value.replace(/\s+/g, "");
+        input.value = v;
+        cellOf(input).classList.remove("invalid");
+
+        if (v === "") {
+          inputs.forEach(function (o) {
+            if (o !== input) { o.value = ""; cellOf(o).classList.remove("invalid"); }
+          });
+          return;
+        }
+        if (!RULES[base].test(v)) { cellOf(input).classList.add("invalid"); return; }
+
+        var big;
+        try { big = BigInt(PREFIX[base] + v.toLowerCase()); }
+        catch (err) { cellOf(input).classList.add("invalid"); return; }
+
+        inputs.forEach(function (o) {
+          var b = +o.dataset.base;
+          if (b === base) return;
+          o.value = big.toString(b).toUpperCase();
+          cellOf(o).classList.remove("invalid");
+        });
+      });
+    });
   })();
 </script>
 </body>
