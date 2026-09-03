@@ -1,102 +1,81 @@
-# 青岩 · 游戏产线计算器网站 · v4
+# 青岩 · 游戏工具网站 · v6
 
-在 v3 基础上只调整了粒子光效：
+v6 内容：**新增进制转换、导数计算器、积分计算器、学习资料**四个功能 + 第二页入场动画精修 + 桌面滚轮翻页 + 计算器手机端适配。
 
-- **绿蓝交替**：粒子按序号偶数取绿色调（色相 132/145/155）、奇数取蓝色调（色相 203/212/222），背景星尘同样绿蓝交替；中心辉光保持蓝色。
-- **密度翻倍**：三条轨道的粒子数量从 55/70/85 提高到 110/140/170（共 420 颗；手机屏仍自动按 0.6 系数缩减）。
+## 功能总览（第二页 · 每排两个）
 
-其余（背景图、暗色遮罩、「青岩」字号、双按钮、目录结构与镜像对齐、端口 2028）均与 v3 相同。
+| 功能 | 形式 | 说明 |
+| --- | --- | --- |
+| 戴森球计划 | 独立页 `/dsp/` | 产线计算器 |
+| 幸福工厂 | 独立页 `/satisfactory/` | 产线计算器 |
+| 音乐解锁 | 独立页 `/music/` | UnlockMusic v1.10.8 |
+| 进制转换 | 弹出二级界面 | 2×2 四进制实时换算（支持小数，BigInt 有理数精确换算） |
+| 导数计算器 | 独立页 `/derivative/` | 符号求导（CAS 引擎） |
+| 积分计算器 | 独立页 `/integral/` | 符号积分（基本积分表 + 线性换元 + 分部积分） |
+| 学习资料 | 弹出二级界面 | NAS 分享链接直达下载 |
+
+## 导数 / 积分计算器
+
+- 自研符号计算引擎 `cas.js`（纯前端零依赖）：解析 → 求导/积分 → 化简 → 格式化，系数全程有理数精确运算。
+- 求导覆盖：四则、幂、链式法则、一般 u^v（含 x^x）、sin cos tan cot sec csc、asin acos atan、ln log sqrt exp。
+- 积分覆盖：多项式/幂、1/x、e^u、a^u、sin cos tan cot ln sqrt、1/(kx+b)、线性换元 u=kx+b、分部积分（如 x·e^x）；超出范围明确提示。
+- 快捷输入面板：数字、π/e、运算符、^2、√、ln、三角/反三角等一键在光标处插入；点击函数键自动补全完整括号，光标停在括号内。
+- 两页均为纯黑背景，左上「← 返回功能导航」直达功能页（`../#functions`）。
+
+## 学习资料
+
+卡片点击弹出二级界面，内含 NAS 分享链接（ug.link）直达下载；文件更新只需在 NAS 端操作，网站无需改动。
+
+## 其他改进
+
+1. **桌面端滚轮 = 整页翻页**：滚轮不再自由滚动（那会与强制吸附打架产生卡顿），而是被识别为「翻到下一页/上一页」——阈值累积（兼容触控板小增量）+ 冷却锁（防惯性连翻）。触屏滚动不产生 wheel 事件，手机端不受影响；二级界面打开时滚轮被屏蔽。
+2. **计算器手机端适配**：两个计算器原为固定高度应用壳（`body overflow:hidden` + 控制列限高 45vh），手机上控制列被裁切、「计算产线」按钮不可见。现改为移动端**整页自然滚动**：解除固定壳、控制列完整展示（`[v6-patch]` 标记），画布区保留 60vh 供拖拽缩放。
+3. **第二页入场编排**：标题字距收拢 + 卡片交错上浮（7 张依次 0.20s→1.04s），滚回重进可重放；用 CSS animation 实现，不影响 hover 灵敏度。（原计划的温度显示功能按需求取消。）
+4. **界面清理**：移除页脚（数据来源与版本行）和首页 GAME TOOLS 副标题。
+
+## 站点结构
 
 ```
-http://<主机IP>:2028/              → 门户首页（青岩 · 背景图 + 绿蓝粒子光效）
-http://<主机IP>:2028/dsp/          → 戴森球计划 产线计算器
-http://<主机IP>:2028/satisfactory/ → 幸福工厂 产线计算器
+https://yanqing.20051016.xyz/       → 门户（分页式双页）
+  第一页：青岩 + 背景图 + 粒子光效
+  第二页：功能导航（七个功能卡片，每排两个）
+https://yanqing.20051016.xyz/dsp/          → 戴森球计划 产线计算器
+https://yanqing.20051016.xyz/satisfactory/ → 幸福工厂 产线计算器
+https://yanqing.20051016.xyz/music/        → 音乐解锁 UnlockMusic v1.10.8
+https://yanqing.20051016.xyz/derivative/   → 导数计算器
+https://yanqing.20051016.xyz/integral/     → 积分计算器
+https://yanqing.20051016.xyz/build_info.txt→ 构建时间（验证线上版本）
 ```
 
-## 目录结构（= 镜像内布局）
+本地目录（v6/ 即站点根）：门户 4 文件 + `dsp/`、`satisfactory/`、`music/`、`derivative/`（index.html + cas.js）、`integral/`（index.html + cas.js）+ 构建配置（package.json / build.js / esa.jsonc / github-upload/ 五个 zip）。
 
-```
-网站/
-└── v4/                  # 本目录就是站点根目录
-    ├── index.html       # 门户：青岩 + 双按钮
-    ├── styles.css       # 背景图 + 遮罩 + 标题/按钮样式
-    ├── particles.js     # 绿蓝交替粒子环绕光效（透明画布，密度×2）
-    ├── bg.jpg           # 背景图（1920×1080 压缩版）
-    ├── dsp/             # 戴森球计算器 app 原样副本
-    ├── satisfactory/    # 幸福工厂计算器 app 原样副本
-    ├── package.json     # 静态托管构建入口（无依赖，build = node build.js）
-    ├── build.js         # 构建脚本：校验入口文件 + 复制站点到 dist/
-    ├── esa.jsonc        # 阿里云 ESA 构建配置（installCommand/buildCommand/outputDirectory）
-    ├── .gitignore       # 忽略 node_modules/ 与 dist/（构建产物）
-    ├── Dockerfile
-    ├── nginx.conf
-    ├── docker-compose.yml
-    ├── .dockerignore
-    └── README.md
-```
+## 上传与推送
 
-## 部署（阿里云 ESA / GitHub 仓库静态托管）
-
-仓库 [yanqing1016/mywebsite](https://github.com/yanqing1016/mywebsite) 的根目录就是站点根（index.html、dsp/、satisfactory/……），可直接在 ESA「Pages/站点托管」里从 Git 构建。
-
-**此前构建失败的原因**：ESA 的默认构建流程是 `npm install` → `npm run build`（Node 22）。仓库里没有 `package.json` 时，安装步骤能跳过，但构建步骤直接执行 npm 就报 `ENOENT: no such file or directory ... package.json` 而失败；`esa.jsonc` 是 ESA 的可选构建配置文件，缺失只会记一条日志并回退默认值。
-
-**v4 已修复**（原地补充，不影响 Docker 部署）：
-
-- `package.json`：零依赖，仅声明 `"build": "node build.js"`，让 ESA 的默认构建命令能跑通。
-- `build.js`：构建 = 校验入口文件存在 + 把站点文件复制到 `dist/` + 生成 `build_info.txt`（Node 16.7+ 标准库，ESA 的 Node 22 直接可用）。
-- `esa.jsonc`：声明安装命令留空、构建命令 `npm run build`、输出目录 `dist`；字段名按 ESA 日志推导，若与控制台设置不一致，以控制台为准。
-
-ESA 控制台里对应设置（若面板可填）：安装命令留空、构建命令 `npm run build`、**输出目录 `dist`**。推送到 main 分支后触发重建，构建成功后通过 `https://<你的域名>/build_info.txt` 验证是否为新构建。
-
-### GitHub 仓库需要哪些文件
-
-仓库根目录 = 站点根，必须包含：
-
-- 根目录 4 个门户文件：`index.html`、`styles.css`、`particles.js`、`bg.jpg`（已推送 ✓）
-- 构建配套：`package.json`、`build.js`、`esa.jsonc`、`.gitignore`（已推送 ✓）
-- **两个计算器目录**：`dsp/` 与 `satisfactory/`，各只需 5 个文件 —— `index.html`、`styles.css`、`data.js`、`app.js`、`vendor/html2canvas.min.js`。图标已全部内嵌在 data.js（data URL），**运行不需要 img/ 目录**（它只在本地重新生成数据时用）。
-
-本目录的 `github-upload/` 就是按上述要求生成的网页上传包（10 个文件，约 4.7MB）：在 GitHub 仓库页 **Add file → Upload files**，把 `github-upload/` 里的 `dsp` 和 `satisfactory` 两个文件夹一起拖进去，Commit 即可（GitHub 会保留文件夹结构，10 个文件远低于单次 100 个的上传限制）。
-
-> 之所以只传 10 个文件而不是完整 app 目录（dsp 189 个文件 / satisfactory 365 个），是因为本机未装 git，网页拖传几百个文件不现实；而 5 个运行必需文件已足够线上完整运行（浏览器已实测：门户、双计算器初始化、图标渲染全部正常）。
-
-## 部署（NAS / 任意 Docker 主机）
-
-把整个 `v4/` 目录传到 NAS，然后：
+v6 起接入 **GitHub API 自动推送**（`D:\test\.tools\github_deploy.py` + `github_deploy.json`，无需 git）：
 
 ```bash
-cd v4
-docker compose up -d --build   # 更新后必须带 --build，否则会复用旧镜像
+python D:\test\.tools\github_deploy.py <版本目录> <相对文件...>   # 推送/更新
+python D:\test\.tools\github_deploy.py --del <仓库内路径...>      # 删除仓库文件
+python D:\test\.tools\github_deploy.py --check <版本目录> <文件...> # 只比对不修改
 ```
 
-- 修改端口：改 `docker-compose.yml` 里 `ports:` 左侧数字。
-- 验证新版本：门户页脚注应显示 `v4`；或访问 `/build_info.txt` 看构建时间。
+注意：计算器 zip 的仓库内位置是**根目录** `dsp.zip`、`satisfactory.zip`（与 build.js 的解压约定一致），不是 `github-upload/` 子目录（那只是本地打包暂存区）。
 
-## 更新计算器
+## 本地验证
 
-```powershell
-robocopy D:\test\戴森球计算器\app   D:\test\网站\v4\dsp           /MIR
-robocopy D:\test\幸福工厂计算器\app D:\test\网站\v4\satisfactory  /MIR
-```
-
-重新 `docker compose up -d --build` 即可。
-
-## 本地预览
-
-- 最简单：直接双击 `index.html`（目录结构与线上完全一致）。
-- 或 `python -m http.server 8080`（在本目录），访问 `http://localhost:8080/`。
+- `python _verify_local.py` / `python _verify_dist.py`（构建后）—— 全部路径与内容检查。
+- 构建：`npm run build`（Node 16.7+；本机可用 `D:\test\.tools` 的便携版 Node 22）。
 
 ## 版本历史
 
-- **v1**：门户 + 双计算器合并为单容器站点（卡片式导航页）。
-- **v2**：门户重做 —— 纯黑背景、蓝色粒子环绕光效、大字「青岩」、双按钮入口。
-- **v3**：「青岩」调小；新增背景图（压缩 1920×1080）+ 暗色遮罩，粒子改透明拖尾；目录结构对齐镜像布局。
-- **v4**：粒子改为绿蓝交替，密度增加一倍（210 → 420 颗）。
-- **v4 修订**（原地更新，不另开版本）：两个入口按钮下移贴到视口下部（标题中偏上、按钮距底部约 11vh），中间完全让位给粒子光效；粒子更小更细腻、密度 420 → 600 颗、绿蓝色相进一步拉开（118–138 对 210–226）提高对比度；缓存参数 `styles.css?v=4.2`、`particles.js?v=4.3`。
-- **v4 修订 2**（原地更新）：修复阿里云 ESA 从 Git 构建失败的问题——新增 `package.json`、`build.js`、`esa.jsonc`、`.gitignore`，构建 = 复制站点到 `dist/`；Docker 部署不受影响。
-- **v4 修订 3**（原地更新）：ESA 二次构建失败定位为仓库缺少 `dsp/`、`satisfactory/` 目录；新增 `github-upload/`（每个计算器仅 5 个运行必需文件，共 10 个），网页拖传即可补齐；浏览器实测精简版双计算器运行正常。
+- **v1**：门户 + 双计算器合并为单容器站点。
+- **v2**：纯黑背景、蓝色粒子环绕光效、大字「青岩」、双按钮入口。
+- **v3**：背景图 + 暗色遮罩，粒子透明拖尾；目录结构对齐部署布局。
+- **v4**：绿蓝交替粒子、密度提升；接入阿里云 ESA Pages 自动部署（esa.jsonc / build.js / zip 上传包体系）。
+- **v5**：分页式双页门户、翻页过渡、粒子随滚动淡出；音乐解锁整合至 `/music/`；门户文件同步上线。
+- **v6**：第二页入场动画精修（标题字距收拢 + 卡片交错上浮 + 可重放）；桌面端滚轮接管为整页翻页；两个计算器手机端整页滚动适配（修复「计算产线」按钮不可见）；**新增进制转换（弹出二级界面）、导数计算器、积分计算器、学习资料四个功能**；门户扩展为 7 张长方形卡片（每排两个）；移除页脚与 GAME TOOLS；接入 GitHub API 自动推送。后续补丁：功能卡片整体居中；计算器键盘重排 + ⌫ 退格 + 纯黑背景 + 返回定向功能页；进制转换支持小数（BigInt 有理数精确换算，无限小数以 … 提示）；计算器函数键自动补全右括号；下滑进入功能页背景图模糊过渡（`.page-bg` 独立图层 + `body.at-functions`，styles.css 版本参数随之升至 v6.4）。
+- **注意**：多文件推送会产生多个提交，ESA 可能在中途提交上触发构建，把新 URL 的静态资源缓存成旧内容——遇到时把 `?v=` 参数再升一位即可强制回源（本次 styles.css 由 v6.1 升至 v6.2 就是这个原因）。
 
 ## 许可
 
-代码 MIT。背景图版权归其作者所有，仅作个人站点背景使用。游戏资产版权归 柚子猫(重庆)网络科技有限公司 / Coffee Stain Studios 所有，仅链接展示。
+代码 MIT。背景图版权归其作者所有，仅作个人站点背景使用。游戏资产版权归 柚子猫(重庆)网络科技有限公司 / Coffee Stain Studios 所有，仅链接展示。音乐解锁基于 UnlockMusic（unlock-music.dev）。
