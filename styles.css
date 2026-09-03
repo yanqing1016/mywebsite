@@ -26,6 +26,16 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* 页面进入：整页淡入；点击功能卡片离开时整页淡出再跳转（html.qy-exit 由 JS 添加） */
+body { animation: pageIn 0.5s ease both; }
+@keyframes pageIn {
+  from { opacity: 0; }
+}
+html.qy-exit body {
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
 /* 背景图层：独立固定层，翻到功能页时可单独加模糊（不影响前景内容）。
    外扩 32px 遮住模糊产生的透明边缘。 */
 .page-bg {
@@ -452,5 +462,7 @@ html.js .panel.visible .entry:nth-child(7) { animation-delay: 1.04s; }
   html.js .panel.visible .entry { animation: none; }
   .base-overlay, .base-panel { transition: none; }
   .page-bg { transition: none; }
+  body { animation: none; }
+  html.qy-exit body { transition: none; opacity: 1; }
   html { scroll-behavior: auto; }
 }
