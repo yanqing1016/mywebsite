@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#000000" />
 <title>青岩 · 游戏产线计算器</title>
-<link rel="stylesheet" href="styles.css?v=6.2" />
+<link rel="stylesheet" href="styles.css?v=6.3" />
 <script>document.documentElement.className += " js";</script>
 </head>
 <body>
@@ -22,7 +22,7 @@
     </a>
   </section>
 
-  <!-- 第二页：功能选择（仅背景，无粒子） -->
+  <!-- 第二页：功能导航（四个功能 2×2，点击进入各自界面） -->
   <section class="panel" id="functions">
     <div class="panel-inner">
       <p class="panel-title">功能导航 · FUNCTION</p>
@@ -30,46 +30,32 @@
         <a class="entry dsp" href="dsp/">
           <span class="ico">◉</span>
           <span class="txt">
-            <span class="zh">戴森球计划 · 计算器</span>
-            <span class="en">Dyson Sphere Program</span>
+            <span class="zh">戴森球计划</span>
+            <span class="en">产线计算器</span>
           </span>
         </a>
         <a class="entry sfy" href="satisfactory/">
           <span class="ico">⚙</span>
           <span class="txt">
-            <span class="zh">幸福工厂 · 计算器</span>
-            <span class="en">Satisfactory 1.0</span>
+            <span class="zh">幸福工厂</span>
+            <span class="en">产线计算器</span>
           </span>
         </a>
         <a class="entry music" href="music/">
           <span class="ico">♪</span>
           <span class="txt">
             <span class="zh">音乐解锁</span>
-            <span class="en">Unlock Music · NCM / QMC / MFLAC</span>
+            <span class="en">NCM · QMC · MFLAC</span>
           </span>
         </a>
+        <button type="button" class="entry base" id="openBase">
+          <span class="ico">⇄</span>
+          <span class="txt">
+            <span class="zh">进制转换</span>
+            <span class="en">BIN · OCT · DEC · HEX</span>
+          </span>
+        </button>
       </nav>
-      <section class="base-tool" aria-label="进制转换">
-        <p class="base-title">进制转换 · BASE CONVERTER</p>
-        <div class="base-grid">
-          <label class="base-cell">
-            <span class="base-name">二进制 <i>BIN</i></span>
-            <input type="text" data-base="2" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
-          </label>
-          <label class="base-cell">
-            <span class="base-name">八进制 <i>OCT</i></span>
-            <input type="text" data-base="8" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
-          </label>
-          <label class="base-cell">
-            <span class="base-name">十进制 <i>DEC</i></span>
-            <input type="text" data-base="10" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
-          </label>
-          <label class="base-cell">
-            <span class="base-name">十六进制 <i>HEX</i></span>
-            <input type="text" data-base="16" autocomplete="off" spellcheck="false" placeholder="0">
-          </label>
-        </div>
-      </section>
     </div>
     <footer class="foot">
       <p>数据来源：BWIKI 戴森球计划公式合集 · SatisfactoryTools / satisfactory-calculator.com · UnlockMusic</p>
@@ -77,6 +63,35 @@
     </footer>
   </section>
 </main>
+
+<!-- 二级界面：进制转换（点击功能卡片进入） -->
+<div class="base-overlay" id="baseOverlay" aria-hidden="true">
+  <div class="base-panel">
+    <div class="base-head">
+      <button type="button" class="base-back" id="baseBack">← 返回功能导航</button>
+      <p class="base-title">进制转换 · BASE CONVERTER</p>
+    </div>
+    <div class="base-grid">
+      <label class="base-cell">
+        <span class="base-name">二进制 <i>BIN</i></span>
+        <input type="text" data-base="2" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
+      </label>
+      <label class="base-cell">
+        <span class="base-name">八进制 <i>OCT</i></span>
+        <input type="text" data-base="8" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
+      </label>
+      <label class="base-cell">
+        <span class="base-name">十进制 <i>DEC</i></span>
+        <input type="text" data-base="10" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="0">
+      </label>
+      <label class="base-cell">
+        <span class="base-name">十六进制 <i>HEX</i></span>
+        <input type="text" data-base="16" autocomplete="off" spellcheck="false" placeholder="0">
+      </label>
+    </div>
+    <p class="base-tip">在任意格输入，其余三格实时换算（BigInt 精确换算，大数不丢精度）</p>
+  </div>
+</div>
 
 <script src="particles.js?v=6"></script>
 <script>
@@ -99,11 +114,12 @@
 
   /* 桌面端：把滚轮识别为整页翻页（而非自由滚动），消除吸附卡顿。
      阈值累积（兼容触控板小增量）+ 冷却锁（防惯性连翻）；
-     触屏滚动不产生 wheel 事件，不受影响。 */
+     触屏滚动不产生 wheel 事件，不受影响；进制转换界面打开时滚轮被屏蔽。 */
   (function () {
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var acc = 0, locked = false, decay = 0;
     var THRESHOLD = 60, LOCK_MS = 1100;
+    var overlay = document.getElementById("baseOverlay");
 
     function flip(dir) {
       locked = true;
@@ -114,6 +130,7 @@
     }
 
     window.addEventListener("wheel", function (e) {
+      if (overlay && overlay.classList.contains("open")) { e.preventDefault(); return; }
       var vh = window.innerHeight || 1;
       var onFirst = (window.scrollY || window.pageYOffset || 0) < vh / 2;
       var goingDown = e.deltaY > 0;
@@ -127,6 +144,30 @@
       if (acc >= THRESHOLD) flip(1);
       else if (acc <= -THRESHOLD) flip(-1);
     }, { passive: false });
+  })();
+
+  /* 二级界面开关：卡片点击 / 返回按钮 / Esc / 点击遮罩 */
+  (function () {
+    var overlay = document.getElementById("baseOverlay");
+    var openBtn = document.getElementById("openBase");
+    var backBtn = document.getElementById("baseBack");
+    if (!overlay || !openBtn) return;
+    function setOpen(open) {
+      overlay.classList.toggle("open", open);
+      overlay.setAttribute("aria-hidden", open ? "false" : "true");
+      if (open) {
+        var first = overlay.querySelector("input");
+        if (first) setTimeout(function () { first.focus(); }, 420);
+      }
+    }
+    openBtn.addEventListener("click", function () { setOpen(true); });
+    backBtn.addEventListener("click", function () { setOpen(false); });
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay) setOpen(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && overlay.classList.contains("open")) setOpen(false);
+    });
   })();
 
   /* 进制转换：任一格输入，实时换算其余三格（BigInt 保证大数精度）。
