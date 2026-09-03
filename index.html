@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#000000" />
 <title>青岩 · 游戏产线计算器</title>
-<link rel="stylesheet" href="styles.css?v=5.1" />
+<link rel="stylesheet" href="styles.css?v=6" />
 <script>document.documentElement.className += " js";</script>
 </head>
 <body>
@@ -52,24 +52,22 @@
     </div>
     <footer class="foot">
       <p>数据来源：BWIKI 戴森球计划公式合集 · SatisfactoryTools / satisfactory-calculator.com · UnlockMusic</p>
-      <p class="ver">v5</p>
+      <p class="ver">v6</p>
     </footer>
   </section>
 </main>
 
-<script src="particles.js?v=5.1"></script>
+<script src="particles.js?v=6"></script>
 <script>
-  /* 第二页内容入场动画：滚动到可视区时加 .visible（无 IO 环境直接显示） */
+  /* 第二页入场动画：进入视口加 .visible 触发交错上浮；离开时移除，
+     使每次翻页都重放动画（无 IO 环境直接显示）。 */
   (function () {
     var panel = document.getElementById("functions");
     if (!panel) return;
     if ("IntersectionObserver" in window) {
       var io = new IntersectionObserver(function (entries) {
         for (var i = 0; i < entries.length; i++) {
-          if (entries[i].isIntersecting) {
-            panel.classList.add("visible");
-            io.disconnect();
-          }
+          panel.classList.toggle("visible", entries[i].isIntersecting);
         }
       }, { threshold: 0.35 });
       io.observe(panel);
