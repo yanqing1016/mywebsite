@@ -85,13 +85,6 @@ section { scroll-snap-align: start; }
   50%      { text-shadow: 0 0 26px rgba(58, 160, 255, 0.80), 0 0 90px rgba(58, 160, 255, 0.45), 0 0 180px rgba(58, 160, 255, 0.28); }
 }
 
-.tagline {
-  margin-top: 18px;
-  font-size: clamp(10px, 1.6vw, 13px);
-  letter-spacing: 0.55em;
-  text-indent: 0.55em;
-  color: var(--muted);
-}
 
 /* 下滑指示：文字 + 三个向下的大于号，依次亮起 */
 .scroll-hint {
@@ -179,10 +172,13 @@ html.js .panel:not(.visible) .entry {
 html.js .panel.visible .entry {
   animation: cardIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
-html.js .panel.visible .entry:nth-child(1) { animation-delay: 0.25s; }
-html.js .panel.visible .entry:nth-child(2) { animation-delay: 0.42s; }
-html.js .panel.visible .entry:nth-child(3) { animation-delay: 0.59s; }
-html.js .panel.visible .entry:nth-child(4) { animation-delay: 0.76s; }
+html.js .panel.visible .entry:nth-child(1) { animation-delay: 0.20s; }
+html.js .panel.visible .entry:nth-child(2) { animation-delay: 0.34s; }
+html.js .panel.visible .entry:nth-child(3) { animation-delay: 0.48s; }
+html.js .panel.visible .entry:nth-child(4) { animation-delay: 0.62s; }
+html.js .panel.visible .entry:nth-child(5) { animation-delay: 0.76s; }
+html.js .panel.visible .entry:nth-child(6) { animation-delay: 0.90s; }
+html.js .panel.visible .entry:nth-child(7) { animation-delay: 1.04s; }
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(36px) scale(0.96); }
   to   { opacity: 1; transform: none; }
@@ -306,22 +302,57 @@ html.js .panel.visible .entry:nth-child(4) { animation-delay: 0.76s; }
   color: var(--muted);
 }
 
-/* 四个功能入口：2×2 网格 */
+/* 学习资料分享链接 */
+.study-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  border-radius: 12px;
+  background: rgba(250, 204, 21, 0.06);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.study-link:hover {
+  border-color: #facc15;
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.25);
+  transform: translateY(-2px);
+}
+.study-ico {
+  width: 46px; height: 46px;
+  display: grid; place-items: center;
+  font-size: 21px;
+  border-radius: 12px;
+  color: #facc15;
+  background: rgba(250, 204, 21, 0.10);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  flex: none;
+}
+.study-txt { display: flex; flex-direction: column; gap: 3px; }
+.study-zh { font-size: 16px; letter-spacing: 2px; }
+.study-en { font-size: 11px; letter-spacing: 1px; color: var(--muted); }
+.study-go { margin-left: auto; font-size: 18px; color: #facc15; }
+
+
+/* 第二页内容容器：占满面板宽度（配合 2×2/多行卡片网格） */
+.panel-inner { width: 100%; }
+
+/* 四个以上功能入口：每排两个（长方形横条卡片），满行自动换行 */
 .entries {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: clamp(14px, 2.5vw, 24px);
   width: 100%;
-  max-width: 680px;
+  max-width: 920px;
 }
 
 .entry {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 22px 12px 18px;
+  gap: 18px;
+  padding: 24px 26px;
   border: 1px solid rgba(58, 160, 255, 0.28);
   border-radius: 14px;
   background: rgba(2, 10, 24, 0.55);
@@ -335,11 +366,11 @@ html.js .panel.visible .entry:nth-child(4) { animation-delay: 0.76s; }
 }
 
 .entry .ico {
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   display: grid;
   place-items: center;
-  font-size: 24px;
+  font-size: 25px;
   border-radius: 14px;
   flex: none;
 }
@@ -347,10 +378,13 @@ html.js .panel.visible .entry:nth-child(4) { animation-delay: 0.76s; }
 .entry.sfy .ico { color: var(--sfy); background: rgba(251, 146, 60, 0.10); border: 1px solid rgba(251, 146, 60, 0.35); }
 .entry.music .ico { color: var(--music); background: rgba(77, 186, 135, 0.10); border: 1px solid rgba(77, 186, 135, 0.35); }
 .entry.base .ico { color: #a78bfa; background: rgba(167, 139, 250, 0.10); border: 1px solid rgba(167, 139, 250, 0.35); }
+.entry.deriv .ico { color: #2dd4bf; background: rgba(45, 212, 191, 0.10); border: 1px solid rgba(45, 212, 191, 0.35); }
+.entry.integ .ico { color: #818cf8; background: rgba(129, 140, 248, 0.10); border: 1px solid rgba(129, 140, 248, 0.35); }
+.entry.study .ico { color: #facc15; background: rgba(250, 204, 21, 0.10); border: 1px solid rgba(250, 204, 21, 0.35); }
 
-.entry .txt { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.entry .zh { font-size: 16px; letter-spacing: 2px; }
-.entry .en { font-size: 10.5px; letter-spacing: 1px; color: var(--muted); }
+.entry .txt { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.entry .zh { font-size: 17px; letter-spacing: 2px; }
+.entry .en { font-size: 11px; letter-spacing: 1px; color: var(--muted); }
 
 .entry:hover { transform: translateY(-3px); }
 .entry.dsp:hover {
@@ -369,29 +403,28 @@ html.js .panel.visible .entry:nth-child(4) { animation-delay: 0.76s; }
   border-color: #a78bfa;
   box-shadow: 0 0 24px rgba(167, 139, 250, 0.30), inset 0 0 18px rgba(167, 139, 250, 0.07);
 }
-
-/* 页脚：放在第二屏底部 */
-.foot {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 14px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.8;
-  opacity: 0.75;
-  pointer-events: none;
+.entry.deriv:hover {
+  border-color: #2dd4bf;
+  box-shadow: 0 0 24px rgba(45, 212, 191, 0.30), inset 0 0 18px rgba(45, 212, 191, 0.07);
 }
-.foot .ver { opacity: 0.6; letter-spacing: 2px; }
+.entry.integ:hover {
+  border-color: #818cf8;
+  box-shadow: 0 0 24px rgba(129, 140, 248, 0.30), inset 0 0 18px rgba(129, 140, 248, 0.07);
+}
+.entry.study:hover {
+  border-color: #facc15;
+  box-shadow: 0 0 24px rgba(250, 204, 21, 0.28), inset 0 0 18px rgba(250, 204, 21, 0.07);
+}
+
 
 @media (max-width: 560px) {
-  .entries { gap: 12px; }
-  .entry { padding: 16px 8px 14px; }
+  .entries { grid-template-columns: 1fr; gap: 12px; }
+  .entry { padding: 18px 16px; gap: 14px; }
   .entry .ico { width: 44px; height: 44px; font-size: 20px; }
-  .entry .zh { font-size: 14px; }
-  .entry .en { font-size: 9.5px; }
+  .entry .zh { font-size: 15px; }
+  .entry .en { font-size: 10px; }
   .base-panel { padding: 18px 16px 14px; }
+  .study-link { padding: 16px; }
 }
 
 /* 减少动态效果偏好：停用呼吸灯、箭头、入场编排与平滑翻页 */
