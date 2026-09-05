@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#000000" />
-<title>青岩 · 游戏产线计算器</title>
-<link rel="stylesheet" href="styles.css?v=6.5" />
+<title>青岩</title>
+<link rel="stylesheet" href="styles.css?v=6.6" />
 <script>document.documentElement.className += " js";</script>
 </head>
 <body>
@@ -16,6 +16,9 @@
   <!-- 第一页：青岩（背景 + 粒子光效 + 大字） -->
   <section class="hero" id="top">
     <h1 class="brand">青岩</h1>
+    <!-- 环境数据条：仅 NAS Docker 部署（nginx /ha-api/ 代理 Home Assistant）时有数据；
+         ESA 线上无代理，拉取失败自动整条隐藏。 -->
+    <div class="sensor-strip" id="sensorStrip" aria-hidden="true"></div>
     <a class="scroll-hint" href="#functions" aria-label="下滑查看功能">
       <span class="txt">下滑</span>
       <span class="chevs" aria-hidden="true"><span>&gt;</span><span>&gt;</span><span>&gt;</span></span>
@@ -230,6 +233,86 @@
         if (e.key === "Escape" && item.overlay.classList.contains("open")) setOpen(false);
       });
     });
+  })();
+
+  /* 首页环境数据条：从 /ha-api/（NAS Docker 内 nginx 代理 Home Assistant，令牌在服务端）
+     拉取三个温湿度计与智能插座的读数，横向排在下滑指示上方，每 60s 刷新。
+     ESA 线上部署没有该代理：拉取失败即整条隐藏（连续 3 次失败后停止重试）。 */
+  (function () {
+    var strip = document.getElementById("sensorStrip");
+    if (!strip) return;
+    var SENSORS = [
+      { label: "宿舍内",
+        temp: "sensor.miaomiaoc_cn_blt_3_1jqnbepm4kg00_t2_temperature_p_2_1",
+        hum:  "sensor.miaomiaoc_cn_blt_3_1jqnbepm4kg00_t2_relative_humidity_p_2_2" },
+      { label: "温湿度计",
+        temp: "sensor.miaomiaoc_cn_blt_3_1d5ic2ugg5g01_t2_temperature_p_2_1",
+        hum:  "sensor.miaomiaoc_cn_blt_3_1d5ic2ugg5g01_t2_relative_humidity_p_2_2" },
+      { label: "温湿度计 mini",
+        temp: "sensor.xiaomi_cn_blt_3_1oik1i84h0k01_mini_temperature_p_2_1001",
+        hum:  "sensor.xiaomi_cn_blt_3_1oik1i84h0k01_mini_relative_humidity_p_2_1002" },
+      { label: "智能插座", plug: true,
+        power: "sensor.cuco_cn_941205929_v3_electric_power_p_11_2",
+        temp:  "sensor.cuco_cn_941205929_v3_temperature_p_12_2" }
+    ];
+    var cells = [];
+    SENSORS.forEach(function (s) {
+      var chip = document.createElement("div");
+      chip.className = "sensor-chip" + (s.plug ? " plug" : "");
+      var lbl = document.createElement("span"); lbl.className = "sensor-label"; lbl.textContent = s.label;
+      var main = document.createElement("span"); main.className = "sensor-main"; main.textContent = "—";
+      var sub = document.createElement("span"); sub.className = "sensor-sub"; sub.textContent = "";
+      chip.appendChild(lbl); chip.appendChild(main); chip.appendChild(sub);
+      strip.appendChild(chip);
+      cells.push({ cfg: s, main: main, sub: sub });
+    });
+
+    function fmtNum(v) {
+      var n = parseFloat(v);
+      return isNaN(n) ? String(v) : String(Math.round(n * 10) / 10);
+    }
+
+    function render(map) {
+      cells.forEach(function (c) {
+        var t = c.cfg.temp && map[c.cfg.temp] ? map[c.cfg.temp].state : null;
+        if (c.cfg.plug) {
+          var p = map[c.cfg.power] ? map[c.cfg.power].state : null;
+          c.main.textContent = p === null ? "—" : fmtNum(p) + " W";
+          c.sub.textContent = t === null ? "" : "温度 " + fmtNum(t) + "°C";
+        } else {
+          var h = c.cfg.hum && map[c.cfg.hum] ? map[c.cfg.hum].state : null;
+          c.main.textContent = t === null ? "—" : fmtNum(t) + "°C";
+          c.sub.textContent = h === null ? "" : "湿度 " + fmtNum(h) + "%";
+        }
+      });
+      strip.classList.add("show");
+    }
+
+    var fails = 0, timer = null;
+    function load() {
+      var ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+      timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 6000);
+      fetch("/ha-api/states", ctrl ? { signal: ctrl.signal } : undefined)
+        .then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(function (list) {
+          clearTimeout(timer);
+          fails = 0;
+          var map = {};
+          list.forEach(function (e) { map[e.entity_id] = e; });
+          render(map);
+        })
+        .catch(function () {
+          clearTimeout(timer);
+          fails++;
+          if (!strip.classList.contains("show")) strip.style.display = "none";
+          if (fails >= 3 && window.__sensorTimer) { clearInterval(window.__sensorTimer); window.__sensorTimer = null; }
+        });
+    }
+    load();
+    window.__sensorTimer = setInterval(load, 60000);
   })();
 
   /* 进制转换：任一格输入，实时换算其余三格。
