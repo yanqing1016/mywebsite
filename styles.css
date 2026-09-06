@@ -103,7 +103,7 @@ html.qy-exit body {
   position: fixed;
   inset: -32px;
   z-index: -1;
-  background: url("bg.jpg") center / cover no-repeat;
+  background: url("bg.jpg?v=2") center / cover no-repeat;
   filter: blur(0);
   transition: filter 0.7s ease;
   will-change: filter;
